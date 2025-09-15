@@ -146,14 +146,15 @@ def create_config(task_id, model_path, model_name, model_type, expected_repo_nam
         os.makedirs(output_dir, exist_ok=True)
     config["output_dir"] = output_dir
 
-    if is_style:
-        network_config = config_mapping[network_config_style[model_name]]
-    else:
-        network_config = config_mapping[network_config_person[model_name]]
+    if model_type == "sdxl":
+        if is_style:
+            network_config = config_mapping[network_config_style[model_name]]
+        else:
+            network_config = config_mapping[network_config_person[model_name]]
 
-    config["network_dim"] = network_config["network_dim"]
-    config["network_alpha"] = network_config["network_alpha"]
-    config["network_args"] = network_config["network_args"]
+        config["network_dim"] = network_config["network_dim"]
+        config["network_alpha"] = network_config["network_alpha"]
+        config["network_args"] = network_config["network_args"]
 
     # Save config to file
     config_path = os.path.join(train_cst.IMAGE_CONTAINER_CONFIG_SAVE_PATH, f"{task_id}.toml")
@@ -165,17 +166,30 @@ def create_config(task_id, model_path, model_name, model_type, expected_repo_nam
 def run_training(model_type, config_path):
     print(f"Starting training with config: {config_path}", flush=True)
 
-    training_command = [
-        "accelerate", "launch",
-        "--dynamo_backend", "no",
-        "--dynamo_mode", "default",
-        "--mixed_precision", "bf16",
-        "--num_processes", "1",
-        "--num_machines", "1",
-        "--num_cpu_threads_per_process", "2",
-        f"/app/sd-script/{model_type}_train_network.py",
-        "--config_file", config_path
-    ]
+    if model_type == "sdxl":
+        training_command = [
+            "accelerate", "launch",
+            "--dynamo_backend", "no",
+            "--dynamo_mode", "default",
+            "--mixed_precision", "bf16",
+            "--num_processes", "1",
+            "--num_machines", "1",
+            "--num_cpu_threads_per_process", "2",
+            f"/app/sd-script/{model_type}_train_network.py",
+            "--config_file", config_path
+        ]
+    elif model_type == "flux":
+        training_command = [
+            "accelerate", "launch",
+            "--dynamo_backend", "no",
+            "--dynamo_mode", "default",
+            "--mixed_precision", "bf16",
+            "--num_processes", "1",
+            "--num_machines", "1",
+            "--num_cpu_threads_per_process", "2",
+            f"/app/sd-scripts/{model_type}_train_network.py",
+            "--config_file", config_path
+        ]
 
     try:
         print("Starting training subprocess...\n", flush=True)
