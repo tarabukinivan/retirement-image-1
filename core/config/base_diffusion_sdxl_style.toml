@@ -46,14 +46,14 @@ save_every_n_epochs = 10
 loss_type = "l2"
 
 ###### batch size ######
-train_batch_size = 8
+train_batch_size = 4
 gradient_accumulation_steps = 1
 
 ###### optimizer ######
 optimizer_type = "adamw"
 optimizer_args = [ "betas=(0.9, 0.999)", "weight_decay=1e-04", "eps=1e-08",]
-unet_lr = 2.5e-5
-text_encoder_lr = 2.5e-6
+unet_lr = 2e-5
+text_encoder_lr = 2e-6
 
 ###### lr scheduler ######
 lr_scheduler = "cosine"
@@ -72,6 +72,6 @@ network_dropout = 0
 caption_dropout_rate = 0
 clip_skip = 1
 max_timestep = 1000
-min_snr_gamma = 6
+min_snr_gamma = 8
 scale_weight_norms = 5
 seed = 2951032222
