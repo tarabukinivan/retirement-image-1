@@ -232,8 +232,8 @@ def main():
     os.makedirs(ds_folder, exist_ok=True)
     request_path = os.path.join(ds_folder, f"training_request_{args.task_id}.json")
     model_path = str(train_paths.get_text_base_model_path(original_model_name))
-
-        is_openai = False
+    
+    is_openai = False
     if is_openai_model(original_model_name):
         print("Upgrading python packages for openai model", flush=True)
         run_cmd_with_log(
