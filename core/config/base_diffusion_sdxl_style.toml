@@ -39,7 +39,7 @@ training_comment = ""
 xformers = true
 
 ###### steps and epochs ######
-max_train_epochs = 20
+max_train_epochs = 22
 save_every_n_epochs = 10
 
 ###### loss function ######
