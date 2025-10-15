@@ -4,21 +4,21 @@ from copy import deepcopy
 
 GRPO_CONFIG = {
     "0_1_b": {
-        "lr": 0.00015,
+        "lr": 0.0003,
         "distributed": "ddp",
         "gpu_count": 1,
         "batch_size": 40,
         "vllm_gpu_memory_utilization": 0.4
     },
     "1_2_b": {
-        "lr": 7.5e-5,
+        "lr": 7.5e-6,
         "distributed": "ddp",
         "gpu_count": 1,
         "batch_size": 40,
         "vllm_gpu_memory_utilization": 0.4
     },
     "2_4_b": {
-        "lr": 8e-5,
+        "lr": 8e-6,
         "distributed": "ddp",
         "gpu_count": 2,
         "batch_size": 42,
@@ -26,7 +26,7 @@ GRPO_CONFIG = {
         "use_lora": True
     },
     "4_5_b": {
-        "lr": 8e-5,
+        "lr": 8e-6,
         "distributed": "ddp",
         "gpu_count": 2,
         "batch_size": 42,
@@ -34,7 +34,7 @@ GRPO_CONFIG = {
         "vllm_gpu_memory_utilization": 0.4
     },
     "5_6_b": {
-        "lr": 6e-5,
+        "lr": 6e-6,
         "distributed": "ddp",
         "gpu_count": 2,
         "batch_size": 42,
@@ -42,7 +42,7 @@ GRPO_CONFIG = {
         "vllm_gpu_memory_utilization": 0.4
     },
     "6_9_b": {
-        "lr": 6e-5,
+        "lr": 6e-6,
         "distributed": "ddp",
         "gpu_count": 4,
         "batch_size": 24,
@@ -50,7 +50,7 @@ GRPO_CONFIG = {
         "vllm_gpu_memory_utilization": 0.5
     },
     "9_12_b": {
-        "lr": 6.5e-5,   
+        "lr": 6.5e-6,   
         "distributed": "ddp",
         "gpu_count": 4,
         "use_lora": True,
@@ -58,7 +58,7 @@ GRPO_CONFIG = {
         "vllm_gpu_memory_utilization": 0.6
     },
     "12_15_b": {
-        "lr": 8e-5,
+        "lr": 8e-6,
         "distributed": "ddp",
         "gpu_count": 4,
         "use_lora": True,
@@ -66,7 +66,7 @@ GRPO_CONFIG = {
         "vllm_gpu_memory_utilization": 0.8,
     },
     "15_20_b": {
-        "lr": 8e-5,
+        "lr": 8e-6,
         "distributed": "ddp",
         "gpu_count": 4,
         "use_lora": True,
@@ -75,7 +75,7 @@ GRPO_CONFIG = {
         "use_vllm": False,
     },
     "20_40_b": {
-        "lr": 8e-5,
+        "lr": 8e-6,
         "distributed": "ddp",
         "gpu_count": 8,
         "use_lora": True,
@@ -85,7 +85,7 @@ GRPO_CONFIG = {
         "use_4bit": True
     },
     "40_80_b": {
-        "lr": 8e-5,
+        "lr": 8e-6,
         "distributed": "ddp",
         "gpu_count": 8,
         "use_lora": True,
@@ -136,7 +136,7 @@ def get_grpo_config(param_nums: int) -> dict:
     else:
         print(f"Model size {param_nums} is not supported")
         return {
-            "lr": 4e-5,
+            "lr": 4e-6,
             "distributed": "ds",
             "gpu_count": 8,
             "batch_size": 6,
@@ -230,7 +230,7 @@ def get_training_json(train_info: dict) -> dict:
         "epoch_num": 2,
         "batch_size": config["batch_size"],
         "learning_rate": config["lr"],
-        "min_lr_rate": 0.25,
+        "min_lr_rate": 0.35,
         "use_liger": get_use_liger(model_architecture),
         "optimizer": "paged_adamw_8bit",
         "use_lora": config.get("use_lora", False),
@@ -240,7 +240,7 @@ def get_training_json(train_info: dict) -> dict:
         "request_path": train_info["request_path"],
         "distributed": config.get("distributed", "ddp"),
         "gradient_checkpointing": get_gradient_checkpointing(model_name),
-        "gradient_accumulation_steps": 4,
+        "gradient_accumulation_steps": 2,
         "vllm_gpu_memory_utilization": config.get("vllm_gpu_memory_utilization", 0.4),
         "num_generations": 2,
         "use_vllm": get_use_vllm(model_architecture, model_name),
@@ -304,13 +304,13 @@ def get_training_json(train_info: dict) -> dict:
         run_config["use_vllm"] = False
 
     if model_name in ["unsloth/gemma-2-9b-it"]:
-        run_config["learning_rate"] = 1e-5
+        run_config["learning_rate"] = 1e-6
     if model_name in ["unsloth/codegemma-7b-it", "unsloth/gemma-1.1-2b-it"]:
-        run_config["learning_rate"] = 2.5e-5
+        run_config["learning_rate"] = 2.5e-6
     if model_name in ["zake7749/gemma-2-2b-it-chinese-kyara-dpo", "unsloth/codegemma-2b"]:
-        run_config["learning_rate"] = 1e-5
+        run_config["learning_rate"] = 1e-6
     if model_name in ["unsloth/codegemma-7b", "unsloth/gemma-7b-it"]:
-        run_config["learning_rate"] = 8e-6
+        run_config["learning_rate"] = 8e-7
         
     run_cmd = get_run_cmd(run_config, run_config["gpu_nums"])
     
