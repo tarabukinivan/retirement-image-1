@@ -14,60 +14,60 @@ FIXED_BS_CONFIG = {
 
 INSTRUCT_CONFIG = {
     "0_1_b": {
-        "lr": 0.0001,
+        "lr": 0.0003,
         "distributed": "ddp",
         "gpu_count": 1,
         "batch_size": 140,
         "use_lora": False
     },
     "1_2_b": {
-        "lr": 0.0001,
+        "lr": 0.0003,
         "distributed": "ddp",
         "gpu_count": 1,
         "use_lora": False,
         "batch_size": 100,
     },
     "2_4_b": {
-        "lr": 7.5e-5,
+        "lr": 7.5e-7,
         "distributed": "ddp",
         "gpu_count": 1,
         "batch_size": 48,
     },
     "4_5_b": {
-        "lr": 7e-5,
+        "lr": 7e-6,
         "distributed": "ddp",
         "gpu_count": 2,
         "batch_size": 40,
     },
     "5_9_b": {
-        "lr": 3.5e-5,
+        "lr": 3.5e-6,
         "distributed": "ddp",
         "gpu_count": 2,
         "batch_size": 28,
     },
     "9_12_b": {
-        "lr": 1e-4,
+        "lr": 1e-5,
         "distributed": "ddp",
         "gpu_count": 2,
         "use_lora": True,
         "batch_size": 32,
     },
     "12_15_b": {
-        "lr": 1e-4,
+        "lr": 1e-5,
         "distributed": "ds",
         "gpu_count": 4,
         "use_lora": True,
         "batch_size": 30,
     },
     "15_40_b": {
-        "lr": 8e-5,
+        "lr": 8e-6,
         "distributed": "ds",
         "gpu_count": 4,
         "use_lora": True,
         "batch_size": 18,
     },
     "40_80_b": {
-        "lr": 8e-5,
+        "lr": 8e-6,
         "distributed": "ds",
         "gpu_count": 8,
         "use_lora": True,
@@ -81,7 +81,7 @@ for key in INSTRUCT_CONFIG:
 
 def get_instruct_config(param_nums: int) -> dict:
     result = {
-            "lr": 4e-5,
+            "lr": 4e-6,
             "distributed": "ds",
             "gpu_count": 8,
             "batch_size": 6,
@@ -146,7 +146,7 @@ def get_run_cmd(config: dict, gpu_nums: int):
     --output_dir {output_dir} \
     --num_train_epochs {epoch_num} \
     --per_device_train_batch_size {batch_size} \
-    --per_device_eval_batch_size 1 \
+    --per_device_eval_batch_size 2 \
     --gradient_accumulation_steps {gradient_accumulation_steps} \
     --eval_accumulation_steps 1 \
     --eval_strategy no \
@@ -189,7 +189,7 @@ def get_training_json(train_info: dict) -> dict:
         "epoch_num": 3,
         "batch_size": config["batch_size"],
         "learning_rate": config["lr"],
-        "min_lr_rate": 0.25,
+        "min_lr_rate": 0.35,
         "use_liger": get_use_liger(model_architecture),
         "optimizer": "paged_adamw_8bit",
         "use_lora": config.get("use_lora", False),
