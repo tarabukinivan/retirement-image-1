@@ -229,6 +229,15 @@ def resize_if_needed(model_name, model, token_nums):
         print(f"Error resizing token embeddings for model {model_name}")
         pass
 
+def get_dataset_size_from_json(json_path: str) -> int:
+    """Get the number of records in a JSON file."""
+    try:
+        with open(json_path, 'r') as f:
+            data = json.load(f)
+            return len(data)
+    except Exception as e:
+        print(f"Error reading dataset size from {json_path}: {e}", flush=True)
+        return 0
 
 def init_wandb(train_request: Dict):
     # set wandb_mode=offline; do not upload the data to wandb export WANDB_MODE=offline

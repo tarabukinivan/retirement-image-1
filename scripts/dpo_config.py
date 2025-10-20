@@ -1,4 +1,5 @@
 from model_utility import get_model_architecture, get_model_num_params, get_use_liger, disable_flash_attention, get_gradient_checkpointing, get_gpu_count
+from customized_trainer import get_dataset_size_from_json
 from copy import deepcopy
 from lrs_lookup import get_dpo_lr
 
@@ -82,7 +83,7 @@ for key in DPO_CONFIG:
     DPO_CONFIG[key]["label"] = key
     
 
-def get_config(param_nums: int) -> dict:
+def get_config(param_nums: int, dataset_size: int) -> dict:
     result = None
     if param_nums < 1_000_000_000:
         result = DPO_CONFIG["0_1_b"]
@@ -117,6 +118,15 @@ def get_config(param_nums: int) -> dict:
         result["gpu_count"] = 2
     if param_nums > 13_330_000_000: # 8 GPUs for 13.3B
         result["gpu_count"] = 8
+
+    # Adjust based on dataset size
+    if dataset_size < 1000:
+        result["lr"] *= 1.5
+        result["batch_size"] = max(1, int(result["batch_size"] * 0.75))
+    elif dataset_size > 10000:
+        result["lr"] *= 0.75
+        result["batch_size"] = int(result["batch_size"] * 1.25)
+
     return result
 
 
@@ -188,9 +198,11 @@ def get_run_cmd(config: dict, gpu_nums: int):
 def get_training_json(train_info: dict) -> dict:
     model_name = train_info["model_name"]
     model_path = train_info["model_path"]
+    dataset_path = train_info["dataset"]
     model_architecture = get_model_architecture(model_path)
     param_nums = get_model_num_params(model_name, model_path)
-    config = get_config(param_nums)
+    dataset_size = get_dataset_size_from_json(dataset_path)
+    config = get_config(param_nums, dataset_size)
     run_config = {
         "epoch_num": 3,
         "batch_size": config["batch_size"],

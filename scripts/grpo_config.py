@@ -1,4 +1,5 @@
 from model_utility import get_model_architecture, get_model_num_params, get_use_liger, disable_flash_attention, get_use_vllm, get_gradient_checkpointing, get_gpu_count
+from customized_trainer import get_dataset_size_from_json
 from copy import deepcopy
 
 
@@ -110,38 +111,49 @@ def if_contain_slow_reward_function(dataset_type: dict) -> bool:
     return False
     
 
-def get_grpo_config(param_nums: int) -> dict:
+def get_grpo_config(param_nums: int, dataset_size: int) -> dict:
+    config = None
     if param_nums < 1_000_000_000:
-        return GRPO_CONFIG["0_1_b"]
+        config = GRPO_CONFIG["0_1_b"]
     elif param_nums < 2_000_000_000:
-        return GRPO_CONFIG["1_2_b"]
+        config = GRPO_CONFIG["1_2_b"]
     elif param_nums < 4_000_000_000:
-        return GRPO_CONFIG["2_4_b"]
+        config = GRPO_CONFIG["2_4_b"]
     elif param_nums < 5_000_000_000:
-        return GRPO_CONFIG["4_5_b"]
+        config = GRPO_CONFIG["4_5_b"]
     elif param_nums < 6_000_000_000:
-        return GRPO_CONFIG["5_6_b"]
+        config = GRPO_CONFIG["5_6_b"]
     elif param_nums < 9_000_000_000:
-        return GRPO_CONFIG["6_9_b"]
+        config = GRPO_CONFIG["6_9_b"]
     elif param_nums < 12_000_000_000:
-        return GRPO_CONFIG["9_12_b"]
+        config = GRPO_CONFIG["9_12_b"]
     elif param_nums < 15_000_000_000:  
-        return GRPO_CONFIG["12_15_b"]
+        config = GRPO_CONFIG["12_15_b"]
     elif param_nums < 20_000_000_000:
-        return GRPO_CONFIG["15_20_b"]
+        config = GRPO_CONFIG["15_20_b"]
     elif param_nums < 40_000_000_000:
-        return GRPO_CONFIG["20_40_b"]
+        config = GRPO_CONFIG["20_40_b"]
     elif param_nums < 80_000_000_000:
-        return GRPO_CONFIG["40_80_b"]
+        config = GRPO_CONFIG["40_80_b"]
     else:
         print(f"Model size {param_nums} is not supported")
-        return {
+        config = {
             "lr": 4e-6,
             "distributed": "ds",
             "gpu_count": 8,
             "batch_size": 6,
             "use_lora": True
         }
+
+    # Adjust based on dataset size
+    if dataset_size < 1000:
+        config["lr"] *= 1.5
+        config["batch_size"] = max(1, int(config["batch_size"] * 0.75))
+    elif dataset_size > 10000:
+        config["lr"] *= 0.75
+        config["batch_size"] = int(config["batch_size"] * 1.25)
+
+    return config
 
 
 def get_run_cmd(config: dict, gpu_nums: int):
@@ -222,9 +234,11 @@ def get_run_cmd(config: dict, gpu_nums: int):
 def get_training_json(train_info: dict) -> dict:
     model_name = train_info["model_name"]
     model_path = train_info["model_path"]
+    dataset_path = train_info["dataset"]
     model_architecture = get_model_architecture(model_path)
     param_nums = get_model_num_params(model_name, model_path)
-    config = get_grpo_config(param_nums)
+    dataset_size = get_dataset_size_from_json(dataset_path)
+    config = get_grpo_config(param_nums, dataset_size)
     print(f"config: {config}")
     run_config = {
         "epoch_num": 2,
